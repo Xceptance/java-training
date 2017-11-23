@@ -5,7 +5,6 @@ package com.xceptance.training.map;
 
 import java.lang.reflect.Array;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -26,7 +25,7 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     /**
      * Array that holds our data
      */
-    private Entry[] data;
+    private Entry<K, V>[] data;
     
     /**
      * Holds the current data amount aka size
@@ -39,7 +38,7 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     @SuppressWarnings("unchecked")
     public BasicHashMap()
     {
-        data = (BasicHashMap<K, V>.Entry[]) Array.newInstance(Entry.class, INITIAL_SIZE);
+        data = (BasicHashMap.Entry<K, V>[]) Array.newInstance(Entry.class, INITIAL_SIZE);
     }
     
     @Override
@@ -55,7 +54,7 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
         final int pos = calculatePosition(key);
         
         // get the entry
-        Entry entry = getEntry(key, pos);
+        Entry<K, V> entry = getEntry(key, pos);
         if (entry == null)
         {
             // does not exist
@@ -77,21 +76,37 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
             throw new IllegalArgumentException("Put doesn't support null keys");
         }
 
+        return put(new Entry<K, V>(key, value));
+    }
+        
+    /**
+     * Private put for easy reuse.
+     * 
+     * @param newEntry the new entry data to set
+     * @return
+     * @throws IllegalArgumentException
+     */
+    private V put(Entry<K, V> newEntry)
+    {
+        // check if we have to rehash
+        if (data.length / 2 < size)
+        {
+            rehash();
+        }
+            
         // where is our entry located
-        final int pos = calculatePosition(key);
+        final int pos = calculatePosition(newEntry.key);
         
         // get the entry
-        final Entry entry = getEntry(key, pos);
+        final Entry<K, V> entry = getEntry(newEntry.key, pos);
         if (entry == null)
         {
             size++;
             
-            final Entry newEntry = new Entry(key, value);
-
-            final Entry headEntry = data[pos];
+            final Entry<K, V> headEntry = data[pos];
             if (headEntry != null)
             {
-                newEntry.setNext(headEntry);
+                newEntry.next = headEntry;
             }
             data[pos] = newEntry;
 
@@ -100,12 +115,38 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
         else
         {
             final V oldValue = entry.value;
-            entry.value = value;
+            entry.value = newEntry.value;
             
             return oldValue;
         }
     }
 
+    /**
+     * Rehash our current data into a new array
+     * that is approx. 2 * oldLength + 1
+     */
+    private void rehash()
+    {
+        final Entry<K,V>[] oldData = data;
+        data = (BasicHashMap.Entry<K, V>[]) Array.newInstance(Entry.class, 2 * data.length + 1);
+    
+        size = 0;
+        
+        for (int i = 0; i < oldData.length; i++)
+        {
+            Entry<K, V> entry = oldData[i];
+            
+            while (entry != null)
+            {
+                final Entry<K, V> old = entry;
+                entry = entry.next;
+                old.next = null;
+                
+                put(old);
+            }
+        }
+    }
+    
     @Override
     public void putAll(SimpleMap<K, V> map)
     {
@@ -206,23 +247,21 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
      * @param its position in the array
      * @return
      */
-    private Entry getEntry(final K key, final int position)
+    private Entry<K, V> getEntry(final K key, final int position)
     {
         // get the entry
-        Entry entry = data[position];
-        if (entry != null)
-        { 
-            do
+        Entry<K, V> entry = data[position];
+        
+        while (entry != null)
+        {
+            if (entry.key.equals(key))
             {
-                if (entry.key().equals(key))
-                {
-                    return entry;
-                }
-                
-                entry = entry.getNext();
+                return entry;
             }
-            while (entry != null);
+
+            entry = entry.next;
         }
+
         return null;
     }
 
@@ -232,12 +271,12 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
      * key can never be changed again, but the value
      * can be updated.
      */
-    private static class Entry
+    private static class Entry<K, V>
     {
         private final K key;
         private V value;
         
-        private Entry next;
+        private Entry<K, V> next;
         
         /**
          * Constructor
@@ -250,43 +289,6 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
             this.key = key;
             this.value = value;
         }
-
-        public K key()
-        {
-            return key;
-        }
-
-        public V value()
-        {
-            return value;
-        }
-
-        /**
-         * Update the stored value
-         * 
-         * @param value the new value
-         */
-        public void setValue(V value)
-        {
-            this.value = value;
-        }
-        
-        /**
-         * Update or set the next
-         */
-        public void setNext(final Entry next)
-        {
-            this.next = next;
-        }
-        
-        /**
-         * Return the next entry 
-         * 
-         * @return the next entry in the chain, if there is none, null
-         */
-        public Entry getNext()
-        {
-            return next;
-        }
     }
 }
+
