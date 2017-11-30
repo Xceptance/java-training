@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.xceptance.training.map.BasicHashMap;
+import com.xceptance.training.map.SimpleMap;
 
 
 public class BasicHashMapTest
@@ -18,7 +19,7 @@ public class BasicHashMapTest
      */
     @Test 
     public void createEmptyMap()
-    {
+    { 
         BasicHashMap<?, ?> map = new BasicHashMap<>();
         
         Assert.assertEquals("Map wasn't empty", 0, map.size());
@@ -291,7 +292,133 @@ public class BasicHashMapTest
         }
     }
     
+    // rehashing on entries that have collisions
+    @Test
+    public void rehashWithCollidedEntries()
+    {
+        final BasicHashMap<HashCheater, Integer> map = new BasicHashMap<>();
+        final List<HashCheater> cheaters = new ArrayList<>();
+        
+        for (int i = 0; i < (10 * ((SimpleMap.INITIAL_SIZE * SimpleMap.REHASHING_THRESHOLD) + 1)); i++)
+        {
+            final HashCheater c = new HashCheater(5);
+            cheaters.add(c);
+            
+            map.put(c, new Integer(i));
+        } 
+        
+        // is the size right?
+        Assert.assertEquals(cheaters.size(), map.size());
+        
+        for (int i = 0; i < cheaters.size(); i++)
+        {
+            Assert.assertTrue(i == map.get(cheaters.get(i)));
+            Assert.assertTrue(map.containsKey(cheaters.get(i)));
+        }
+    }
     
+    // rehashing on entries of any hash code
+    @Test
+    public void rehashNormally()
+    {
+        final BasicHashMap<HashCheater, Integer> map = new BasicHashMap<>();
+        final List<HashCheater> cheaters = new ArrayList<>();
+        
+        for (int i = 0; i < (10 * ((SimpleMap.INITIAL_SIZE * SimpleMap.REHASHING_THRESHOLD) + 1)); i++)
+        {
+            final HashCheater c = new HashCheater(i);
+            cheaters.add(c);
+            
+            map.put(c, new Integer(i));
+        } 
+        
+        // is the size right?
+        Assert.assertEquals(cheaters.size(), map.size());
+        
+        for (int i = 0; i < cheaters.size(); i++)
+        {
+            Assert.assertTrue(i == map.get(cheaters.get(i)));
+            Assert.assertTrue(map.containsKey(cheaters.get(i)));
+        }
+    }
+
+    // rehashing with null values (even though that shouldn't matter
+    @Test
+    public void rehashWithNullValues()
+    {
+        final BasicHashMap<HashCheater, Integer> map = new BasicHashMap<>();
+        final List<HashCheater> cheaters = new ArrayList<>();
+        
+        for (int i = 0; i < (10 * ((SimpleMap.INITIAL_SIZE * SimpleMap.REHASHING_THRESHOLD) + 1)); i++)
+        {
+            final HashCheater c = new HashCheater(i);
+            cheaters.add(c);
+            
+            map.put(c, null);
+        } 
+        
+        // is the size right?
+        Assert.assertEquals(cheaters.size(), map.size());
+        
+        for (int i = 0; i < cheaters.size(); i++)
+        {
+            Assert.assertTrue(null == map.get(cheaters.get(i)));
+            Assert.assertTrue(map.containsKey(cheaters.get(i)));
+        }
+    }
+    
+    /**
+     * happy path for keyset
+     */
+    @Test
+    public void happyPathKeySet()
+    {
+        final BasicHashMap<HashCheater, String> map = new BasicHashMap<>();
+        final List<HashCheater> cheaters = new ArrayList<>();
+        
+        for (int i = 0; i < 42; i++)
+        {
+            final HashCheater c = new HashCheater(i);
+            cheaters.add(c);
+            
+            map.put(c, "c" + i);
+        } 
+
+        // get us all keys
+        final Set<HashCheater> set = map.keySet();
+        
+        // do we have as many keys as we have in the map
+        Assert.assertEquals(map.size(), set.size());
+        
+        for (final HashCheater c : set)
+        {
+            Assert.assertTrue(map.containsKey(c));
+        }
+
+        // all keys from set
+        for (final HashCheater setCheater : set)
+        {
+            boolean found = false;
+            
+            // find this cheater in our original list of
+            // stored cheaters
+            for (final HashCheater cheater : cheaters)
+            {
+                if (cheater == setCheater)
+                {
+                    found = true;
+                    continue;
+                }
+            }
+            
+            Assert.assertTrue(found);
+        }
+    }
+    
+    /**
+     * A helper class with predictable hash codes
+     * @author rschwietzke
+     */
     class HashCheater
     {
         private final int hashCode;

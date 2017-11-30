@@ -4,7 +4,7 @@
 package com.xceptance.training.map;
 
 import java.lang.reflect.Array;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -17,11 +17,6 @@ import java.util.Set;
  */
 public class BasicHashMap<K, V> implements SimpleMap<K, V>
 {
-    /**
-     * Initial size of the hashmap array, should be prime
-     */
-    private static final int INITIAL_SIZE = 11;
-    
     /**
      * Array that holds our data
      */
@@ -36,7 +31,7 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
      * Constructor of a default size map
      */
     @SuppressWarnings("unchecked")
-    public BasicHashMap()
+    public BasicHashMap() 
     {
         data = (BasicHashMap.Entry<K, V>[]) Array.newInstance(Entry.class, INITIAL_SIZE);
     }
@@ -89,7 +84,7 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     private V put(Entry<K, V> newEntry)
     {
         // check if we have to rehash
-        if (data.length / 2 < size)
+        if ((int)(data.length * REHASHING_THRESHOLD) < size)
         {
             rehash();
         }
@@ -130,8 +125,10 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
         final Entry<K,V>[] oldData = data;
         data = (BasicHashMap.Entry<K, V>[]) Array.newInstance(Entry.class, 2 * data.length + 1);
     
+        // set the size to 0, because we have already an new empty array in place
         size = 0;
         
+        // iterate over the old array and put all data into the new
         for (int i = 0; i < oldData.length; i++)
         {
             Entry<K, V> entry = oldData[i];
@@ -140,8 +137,9 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
             {
                 final Entry<K, V> old = entry;
                 entry = entry.next;
-                old.next = null;
+                old.next = null; // make sure we do not pass the old list structure along
                 
+                // add this entry to our "new" array
                 put(old);
             }
         }
@@ -150,8 +148,6 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     @Override
     public void putAll(SimpleMap<K, V> map)
     {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
@@ -199,8 +195,21 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     @Override
     public Set<K> keySet()
     {
-        // TODO Auto-generated method stub
-        return Collections.emptySet();
+        // create new set
+        final Set<K> set = new HashSet<>(size);
+         
+        for (int i = 0; i < data.length; i++)
+        {
+            Entry<K, V> entry = data[i];
+            
+            while (entry != null)
+            {
+                set.add(entry.key);
+                entry = entry.next;
+            }
+        }
+        
+        return set;
     }
 
     @Override

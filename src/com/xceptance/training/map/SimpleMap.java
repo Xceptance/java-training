@@ -14,6 +14,16 @@ import java.util.Set;
 public interface SimpleMap<K, V>
 {
     /**
+     * Initial size of the hashmap array, should be prime
+     */
+    public static final int INITIAL_SIZE = 11;
+    
+    /**
+     * Rehashing threshold in percent
+     */
+    public static final double REHASHING_THRESHOLD = 0.5;
+    
+    /**
      * Returns the stored value of a key if it exists, null otherwise. 
      * Null-keys are not permitted, an exception is thrown when a null
      * key is passed.
