@@ -17,7 +17,7 @@ public class Dice
      */
     public Dice()
     {
-        result = 1;
+        roll();
     }
     
     /**
