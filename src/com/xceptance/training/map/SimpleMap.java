@@ -98,7 +98,8 @@ public interface SimpleMap<K, V>
     public boolean isEmpty();
     
     /**
-     * Returns a set of all keys in the map
+     * Returns a set of all keys in the map. For an empty 
+     * map, we return an empty set.
      * 
      * @return a set of all keys
      */

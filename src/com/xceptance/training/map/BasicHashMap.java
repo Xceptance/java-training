@@ -5,6 +5,7 @@ package com.xceptance.training.map;
 
 import java.lang.reflect.Array;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -146,8 +147,40 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     }
     
     @Override
-    public void putAll(SimpleMap<K, V> map)
+    public void putAll(final SimpleMap<K, V> map)
     {
+        // null map is permitted, handle it early
+        if (map == null)
+        {
+            return;
+        }
+        
+        // get all keys from passed map
+        final Set<K> keys = map.keySet();
+        
+        // iterate over all keys and get us the value
+        for (final K key : keys)
+        {
+            // put value in our own map
+            final V value = map.get(key); 
+            this.put(key, value);
+        }
+        
+        // old-school Java 5 and earlier
+//        Iterator<K> iterator = keys.iterator();
+//        while (iterator.hasNext())
+//        {
+//            final K key = iterator.next();
+//            final V value = map.get(key); 
+//            this.put(key, value);
+//        }
+        
+        // fancy Java8 lambda
+//        keys.forEach(key -> 
+//            {
+//                final V value = map.get(key); 
+//                this.put(key, value);
+//            }); 
     }
 
     @Override
@@ -198,14 +231,17 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
         // create new set
         final Set<K> set = new HashSet<>(size);
          
-        for (int i = 0; i < data.length; i++)
+        if (size > 0)
         {
-            Entry<K, V> entry = data[i];
-            
-            while (entry != null)
+            for (int i = 0; i < data.length; i++)
             {
-                set.add(entry.key);
-                entry = entry.next;
+                Entry<K, V> entry = data[i];
+                
+                while (entry != null)
+                {
+                    set.add(entry.key);
+                    entry = entry.next;
+                }
             }
         }
         

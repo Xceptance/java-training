@@ -40,6 +40,7 @@ public class BasicHashMapTest
         
         Assert.assertNull(result);
         Assert.assertEquals(1, map.size());
+        Assert.assertFalse(map.isEmpty());
         
         final Integer finalResult = map.get(1); // important
         
@@ -414,6 +415,145 @@ public class BasicHashMapTest
             Assert.assertTrue(found);
         }
     }
+    
+    /**
+     * Return an empty keyset when the map is empty
+     */
+    @Test
+    public void testKeySetOfEmptyMap()
+    {
+        final BasicHashMap<String, String> map = new BasicHashMap<>();
+        Assert.assertTrue(map.keySet().isEmpty());
+    }
+    
+    /**
+     * Happy Path
+     */
+    @Test
+    public void testPutAllHappyPath()
+    {
+        // both maps are empty
+        {
+            final BasicHashMap<String, String> target = new BasicHashMap<>();
+            final BasicHashMap<String, String> source = new BasicHashMap<>();
+
+            target.putAll(source);
+            Assert.assertTrue(target.isEmpty());
+            Assert.assertTrue(source.isEmpty());
+        }
+
+        // target is empty, source one entry
+        {
+            final BasicHashMap<String, String> target = new BasicHashMap<>();
+            final BasicHashMap<String, String> source = new BasicHashMap<>();
+
+            source.put("s1", "s1v1");
+            
+            target.putAll(source);
+            Assert.assertEquals(1, target.size());
+            Assert.assertEquals(1, source.size());
+            Assert.assertEquals("s1v1", target.get("s1"));
+        }
+
+        // target is empty, source has entries
+        {
+            final BasicHashMap<String, String> target = new BasicHashMap<>();
+            final BasicHashMap<String, String> source = new BasicHashMap<>();
+
+            source.put("s1", "s1v1");
+            source.put("s2", "s2v2");
+            
+            target.putAll(source);
+            Assert.assertEquals(2, target.size());
+            Assert.assertEquals(2, source.size());
+            Assert.assertEquals("s1v1", target.get("s1"));
+            Assert.assertEquals("s2v2", target.get("s2"));
+        }
+
+        
+        // source is empty, target has entries 
+        {
+            final BasicHashMap<String, String> target = new BasicHashMap<>();
+            final BasicHashMap<String, String> source = new BasicHashMap<>();
+
+            target.put("t1", "t1v1");
+            target.put("t2", "t2v2");
+            
+            target.putAll(source);
+            Assert.assertEquals(2, target.size());
+            Assert.assertEquals(0, source.size());
+            Assert.assertEquals("t1v1", target.get("t1"));
+            Assert.assertEquals("t2v2", target.get("t2"));
+        }
+        
+        // both have entries
+        {
+            final BasicHashMap<String, String> target = new BasicHashMap<>();
+            final BasicHashMap<String, String> source = new BasicHashMap<>();
+
+            target.put("t1", "t1v1");
+            target.put("t2", "t2v2");
+
+            source.put("s1", "s1v1");
+            source.put("s2", "s2v2");
+
+            target.putAll(source);
+            Assert.assertEquals(4, target.size());
+            Assert.assertEquals(2, source.size());
+            Assert.assertEquals("s1v1", target.get("s1"));
+            Assert.assertEquals("s2v2", target.get("s2"));
+            Assert.assertEquals("t1v1", target.get("t1"));
+            Assert.assertEquals("t2v2", target.get("t2"));
+        }
+        
+    }
+
+    // both have the same keys, different values
+    @Test
+    public void testPutAllSameKeys()
+    {
+        final BasicHashMap<String, String> target = new BasicHashMap<>();
+        final BasicHashMap<String, String> source = new BasicHashMap<>();
+
+        target.put("t1", "t1v1");
+        target.put("t2", "t2v2");
+
+        source.put("t1", "s1v1");
+        source.put("t2", "s2v2");
+
+        target.putAll(source);
+        Assert.assertEquals(2, target.size());
+        Assert.assertEquals(2, source.size());
+        Assert.assertEquals("s1v1", target.get("t1"));
+        Assert.assertEquals("s2v2", target.get("t2"));
+    }
+
+    // source is null
+    @Test
+    public void testPutAllNull()
+    {
+        final BasicHashMap<String, String> target = new BasicHashMap<>();
+        target.put("t1", "t1v1");
+        target.put("t2", "t2v2");
+
+        target.putAll(null);
+        Assert.assertEquals(2, target.size());
+        Assert.assertEquals("t1v1", target.get("t1"));
+        Assert.assertEquals("t2v2", target.get("t2"));
+    }
+    
+    @Test
+    public void testPutAllSelf()
+    {
+        final BasicHashMap<String, String> target = new BasicHashMap<>();
+        target.put("t1", "t1v1");
+        target.put("t2", "t2v2");
+
+        target.putAll(target);
+        Assert.assertEquals(2, target.size());
+        Assert.assertEquals("t1v1", target.get("t1"));
+        Assert.assertEquals("t2v2", target.get("t2"));
+    }    
     
     /**
      * A helper class with predictable hash codes
