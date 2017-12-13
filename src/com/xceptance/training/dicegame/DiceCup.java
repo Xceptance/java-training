@@ -30,23 +30,21 @@ public class DiceCup
     /**
      * Rolls all dice
      */
-    public void roll()
+    public List<Dice> roll()
     {
-//        for (int i = 0; i < dice.size(); i++)
-//        {
-//            dice.get(i).roll();
-//        }
-//
-//        for (int i = 0; i < dice.size(); i++)
-//        {
-//            Dice d = dice.get(i);
-//            d.roll();
-//        }
-        
         for (Dice d : dice)
         {
             d.roll();
-        }        
+        } 
+       
+        // keep a copy for returning
+        final List<Dice> result = new ArrayList<>(dice);
+        
+        // empty out cup
+        dice.clear();
+       
+        // return result
+        return result;
     }
     
     /**
@@ -54,7 +52,10 @@ public class DiceCup
      */
     public void shake()
     {
-        
+        for (Dice d : dice)
+        {
+            d.roll();
+        }         
     }
     
     /**

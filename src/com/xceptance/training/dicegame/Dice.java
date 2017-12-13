@@ -8,7 +8,7 @@ import java.util.Random;
  * 
  * @author rschwietzke
  */
-public class Dice
+public final class Dice
 {
     private int result;
     
