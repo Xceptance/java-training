@@ -4,6 +4,7 @@
 package com.xceptance.training.map;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -186,7 +187,40 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     @Override
     public V remove(K key) throws IllegalArgumentException
     {
-        // TODO Auto-generated method stub
+        // prevent null from being used
+        if (key == null)
+        {
+            throw new IllegalArgumentException("Remove doesn't support null keys");
+        }
+        
+        // where is our entry located
+        final int pos = calculatePosition(key);
+
+        // get the entry
+        Entry<K, V> parentEntry = null;
+        Entry<K, V> entry = data[pos];
+        
+        while (entry != null)
+        {
+            if (entry.key.equals(key))
+            {
+                if (parentEntry != null)
+                {
+                    parentEntry.next = entry.next;
+                }
+                else
+                {
+                    data[pos] = entry.next;
+                }
+                
+                size--;
+                return entry.value;
+            }
+
+            parentEntry = entry;
+            entry = entry.next;
+        }
+        
         return null;
     }
 
@@ -196,11 +230,12 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
         return size;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void clear()
     {
-        // TODO Auto-generated method stub
-        
+        data = (BasicHashMap.Entry<K, V>[]) Array.newInstance(Entry.class, INITIAL_SIZE);
+        size = 0;
     }
 
     @Override
@@ -249,24 +284,9 @@ public class BasicHashMap<K, V> implements SimpleMap<K, V>
     }
 
     @Override
-    public int hashCode()
-    {
-        // TODO Auto-generated method stub
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        // TODO Auto-generated method stub
-        return super.equals(obj);
-    }
-
-    @Override
     public String toString()
     {
-        // TODO Auto-generated method stub
-        return super.toString();
+        return "BasicHashMap [data=" + Arrays.toString(data) + ", size=" + size + "]";
     }
 
     /**

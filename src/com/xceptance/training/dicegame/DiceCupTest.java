@@ -65,6 +65,63 @@ public class DiceCupTest
         }
     }
     
+    /**
+     * Reset
+     */
+    @Test
+    public void testReset()
+    {
+        final List<Dice> dice = new ArrayList<>();
+        dice.add(new Dice());
+        dice.add(new Dice());
+        
+        final DiceCup dc = new DiceCup(dice);
+        dc.roll();
+        
+        // back into the cup
+        dc.reset(dice);
+        
+        final List<Dice> result = dc.roll();
+        Assert.assertEquals(dice.size(), result.size());
+        
+        // verify that the returned dice are the ones we
+        // put into the cup in the first place
+        for (Dice d : result)
+        {
+            Assert.assertTrue(dice.contains(d));
+        }
+    }
+    
+    @Test
+    public void testResetNoRoll()
+    {
+        final List<Dice> dice = new ArrayList<>();
+        dice.add(new Dice());
+        dice.add(new Dice());
+        
+        final DiceCup dc = new DiceCup(dice);
+        dc.roll();
+        
+        // back into the cup
+        dc.reset(dice);
+        
+        final List<Dice> result = dc.roll();
+        Assert.assertEquals(dice.size(), result.size());
+        
+        // verify that the returned dice are the ones we
+        // put into the cup in the first place
+        for (Dice d : result)
+        {
+            Assert.assertTrue(dice.contains(d));
+        }
+    }
+
+    @Test
+    public void testResetDifferentDice()
+    {
+        
+    }
+    
     static class FakeDice extends Dice
     {
         public int counter;

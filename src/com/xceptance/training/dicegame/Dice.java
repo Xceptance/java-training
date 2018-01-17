@@ -8,7 +8,7 @@ import java.util.Random;
  * 
  * @author rschwietzke
  */
-public final class Dice
+public class Dice
 {
     private int result;
     
@@ -37,10 +37,9 @@ public final class Dice
      */
     public int roll()
     {
-        // random comes here
-        final Random r = new Random();
-        result = (int) (6 * r.nextDouble() + 1); 
-        
+        final Random random = new Random();
+        result = (int) (6 * random.nextDouble() + 1);
+
         return result;
     }
 }

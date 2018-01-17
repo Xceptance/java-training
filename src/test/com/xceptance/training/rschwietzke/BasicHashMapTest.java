@@ -2,7 +2,10 @@ package test.com.xceptance.training.rschwietzke;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -554,6 +557,144 @@ public class BasicHashMapTest
         Assert.assertEquals("t1v1", target.get("t1"));
         Assert.assertEquals("t2v2", target.get("t2"));
     }    
+    
+    /**
+     * Clear
+     */
+    @Test
+    public void testClearEmptyMap()
+    {
+        final BasicHashMap<String, String> target = new BasicHashMap<>();
+        target.clear();
+        
+        Assert.assertEquals(0, target.size());
+        Assert.assertEquals(0, target.keySet().size());
+    }
+
+    @Test
+    public void testClearFullMap()
+    {
+        final BasicHashMap<String, String> target = new BasicHashMap<>();
+        target.put("t1", "t1v1");
+        target.put("t2", "t2v2");
+        
+        target.clear();
+        
+        Assert.assertEquals(0, target.size());
+        Assert.assertEquals(0, target.keySet().size());
+    }
+    
+    
+    /**
+     * Remove
+     */
+    @Test
+    public void testRemoveHappyPath()
+    {
+        final BasicHashMap<String, String> map = new BasicHashMap<>();
+        map.put("k1", "v1");
+        map.put("k2", "v2");
+        
+        Assert.assertEquals("v1", map.remove("k1"));
+        Assert.assertFalse(map.containsKey("k1"));
+        Assert.assertEquals(1, map.size());
+        
+        Assert.assertEquals("v2", map.get("k2"));
+
+        Assert.assertEquals("v2", map.remove("k2"));
+        Assert.assertFalse(map.containsKey("k2"));
+        Assert.assertEquals(0, map.size());
+    }
+    
+    @Test
+    public void testRemoveSameHashValue()
+    {
+        final BasicHashMap<HashCheater, String> map = new BasicHashMap<>();
+        HashCheater c1 = new HashCheater(11);
+        HashCheater c2 = new HashCheater(11);
+        HashCheater c3 = new HashCheater(11);
+        
+        map.put(c1, "v1");
+        map.put(c2, "v2");
+        map.put(c3, "v3");
+        
+        Assert.assertEquals("v2", map.remove(c2));
+        Assert.assertEquals(2, map.size());
+        Assert.assertEquals("v1", map.get(c1));
+        Assert.assertEquals("v3", map.get(c3));
+
+        HashCheater c4 = new HashCheater(11);
+        map.put(c4, "v4");
+
+        Assert.assertEquals("v1", map.remove(c1));
+        Assert.assertEquals(2, map.size());
+        Assert.assertEquals("v4", map.get(c4));
+        Assert.assertEquals("v3", map.get(c3));
+
+        Assert.assertEquals("v4", map.remove(c4));
+        Assert.assertEquals(1, map.size());
+        Assert.assertEquals("v3", map.get(c3));
+
+        Assert.assertEquals("v3", map.remove(c3));
+        Assert.assertEquals(0, map.size());
+    }
+    
+    @Test
+    public void testRemoveNoneExistingEntry()
+    {
+        final BasicHashMap<String, String> map = new BasicHashMap<>();
+        Assert.assertNull(map.remove("k1"));
+        
+        map.put("k1", "v1");
+        
+        Assert.assertEquals("v1", map.remove("k1"));        
+        Assert.assertNull(map.remove("k1"));        
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemoveNullKey()
+    {
+        final BasicHashMap<String, String> map = new BasicHashMap<>();
+        map.remove(null);
+    }   
+
+    /**
+     * Random execution to excerise the map heavily
+     */
+    @Test
+    public void randomness()
+    {
+        final long seed = System.currentTimeMillis();
+        final Random r = new Random(seed);
+        
+        List<String> data = new ArrayList<>();
+        int size = r.nextInt(1000) + 42;
+        
+        for (int i = 0; i < size; i++)
+        {
+            String s = "k" + String.valueOf(r.nextInt(size / 2));
+            data.add(s);
+        }
+        
+        final BasicHashMap<String, Integer> map = new BasicHashMap<>();
+        final Map<String, Integer> reference = new HashMap<>();
+
+        for (int i = 0; i < size; i++)
+        {
+            int x = r.nextInt(10);
+            
+            switch(x)
+            {
+                case 0: 
+                    reference.put(data.get(i), i);
+                    map.put(data.get(i), i);
+                    break;
+                case 1: 
+            }
+            
+            // verify();
+        }
+    }
     
     /**
      * A helper class with predictable hash codes

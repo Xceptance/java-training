@@ -14,19 +14,9 @@ public class DiceCup
      */
     public DiceCup(final List<Dice> dice)
     {
-        // create our own list of dice to make sure
-        // we do not have "null" dice in our hands
-        for (final Dice d : dice)
-        {
-            // check that the dice is an existing dice
-            if (d != null)
-            {
-                // add the dice to the internal list
-                this.dice.add(d);
-            }
-        }
+        reset(dice);
     }
-    
+   
     /**
      * Rolls all dice
      */
@@ -64,6 +54,16 @@ public class DiceCup
      */
     public void reset(List<Dice> dice)
     {
-        
+        // create our own list of dice to make sure
+        // we do not have "null" dice in our hands
+        for (final Dice d : dice)
+        {
+            // check that the dice is an existing dice
+            if (d != null)
+            {
+                // add the dice to the internal list
+                this.dice.add(d);
+            }
+        }        
     }
 }

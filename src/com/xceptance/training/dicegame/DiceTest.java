@@ -16,7 +16,7 @@ public class DiceTest
             
             int result = d.getResult();
             counters[result - 1]++;
-        }
+        } 
 
         for (int i = 0; i < 6; i++)
         {
@@ -67,4 +67,6 @@ public class DiceTest
             Assert.assertEquals(state, d.getResult());
         }
     }
+    
+    
 }
