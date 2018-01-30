@@ -22,7 +22,7 @@ public class DiceCup
      */
     public List<Dice> roll()
     {
-        for (Dice d : dice)
+        for (final Dice d : dice)
         {
             d.roll();
         } 
@@ -52,8 +52,11 @@ public class DiceCup
      * Fill the cup again with dice
      * @param dice a list of dice
      */
-    public void reset(List<Dice> dice)
+    public void reset(final List<Dice> dice)
     {
+        // empty our cup
+        this.dice.clear();
+        
         // create our own list of dice to make sure
         // we do not have "null" dice in our hands
         for (final Dice d : dice)

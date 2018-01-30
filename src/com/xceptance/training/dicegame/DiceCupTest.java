@@ -95,31 +95,28 @@ public class DiceCupTest
     @Test
     public void testResetNoRoll()
     {
-        final List<Dice> dice = new ArrayList<>();
-        dice.add(new Dice());
-        dice.add(new Dice());
-        
-        final DiceCup dc = new DiceCup(dice);
-        dc.roll();
-        
-        // back into the cup
-        dc.reset(dice);
+        final List<Dice> diceSet1 = new ArrayList<>();
+        diceSet1.add(new Dice());
+        diceSet1.add(new Dice());
+
+        final List<Dice> diceSet2 = new ArrayList<>();
+        diceSet2.add(new Dice());
+        diceSet2.add(new Dice());
+        diceSet2.add(new Dice());
+
+        final DiceCup dc = new DiceCup(diceSet1);
+        dc.reset(diceSet2);
         
         final List<Dice> result = dc.roll();
-        Assert.assertEquals(dice.size(), result.size());
+        Assert.assertTrue(diceSet2 != result);
+        Assert.assertEquals(diceSet2.size(), result.size());
         
         // verify that the returned dice are the ones we
         // put into the cup in the first place
-        for (Dice d : result)
+        for (final Dice d : result)
         {
-            Assert.assertTrue(dice.contains(d));
+            Assert.assertTrue(diceSet2.contains(d));
         }
-    }
-
-    @Test
-    public void testResetDifferentDice()
-    {
-        
     }
     
     static class FakeDice extends Dice
